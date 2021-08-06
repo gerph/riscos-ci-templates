@@ -1,0 +1,20 @@
+REM >TestProgram
+REM Test that we're running correctly
+:
+SYS "XOS_Byte",0 TO err%
+osversion$ = FNstring0(err% + 4)
+:
+PRINT "OS version:    ";osversion$
+PRINT "BASIC version: ";REPORT$
+:
+*CDir Artifacts
+o%=OPENOUT("Artifacts.TestOutput")
+BPUT#o%,"Hello world"
+CLOSE#o%
+:
+END
+:
+DEFFNstring0(s%)
+LOCAL s$
+SYS "OS_IntOn", s% TO s$
+=s$
