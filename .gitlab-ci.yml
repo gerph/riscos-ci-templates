@@ -1,0 +1,54 @@
+# Definition for CI within GitLab
+# Note:
+#    Prefix any job name with a '.' to disable.
+#
+
+
+# Enable submodules
+variables:
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: none
+
+
+#### Builds ####
+build-robuild:
+  # Builds using the RISC OS Build service.
+  stage: build
+  script:
+    # Fetch the build client
+    - curl -s -L -o riscos-build-online https://github.com/gerph/robuild-client/releases/download/v0.05/riscos-build-online && chmod +x riscos-build-online
+
+    # Zip up the source to send to robuild
+    - zip -q9r /tmp/source-archive.zip * .robuild.yaml
+
+    # Send the archive file to build service
+    - ./riscos-build-online -i /tmp/source-archive.zip -a off -t 30 -o /tmp/built
+
+    # Rename the file we got
+    - |
+      if [[ -f VersionNum ]] ; then
+          version=$(sed '/MajorVersion / ! d ; s/.*MajorVersion *"\(.*\)"/\1/' VersionNum)
+      else
+          version=$(git rev-parse --short HEAD)
+      fi
+      echo "This is version: $version"
+      leafname="ExampleBuild-$version.zip"
+      if [ -f /tmp/built,a91 ] ; then
+          cp /tmp/built,a91 "ExampleBuild-$version.zip"
+      else
+          echo "No archive was built?"
+          exit 1
+      fi
+
+  artifacts:
+      when: always
+      paths:
+          - ExampleBuild-*.zip
+
+  tags:
+    - linux
+
+
+#### Stages to execute ####
+stages:
+  - build

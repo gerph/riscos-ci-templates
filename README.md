@@ -3,6 +3,7 @@
 ## Introduction
 
 This repository contains a number of templates for use with building RISC OS
-projects within CI systems. Primarily it focusses on GitHub.
+projects within CI systems. Primarily it focusses on GitHub, but there exists
+a GitLab configuration as well.
 
 
