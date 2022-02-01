@@ -14,6 +14,7 @@ jobs:
     # Multiple variables may be assigned.
     env:
       "Sys$Environment": ROBuild
+      "BUILD32": 1
 
     # Directory to change to before running script
     #dir: <working directory>
