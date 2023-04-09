@@ -43,7 +43,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Obtain prerequisite build tool
         run: |
@@ -54,6 +54,7 @@ jobs:
         run: |
           # Zip up the source to send to robuild
           zip -q9r /tmp/source-archive.zip * .robuild.yaml
+
           # Send the archive file to build service (timeout of 60 seconds)
           ./riscos-build-online -i /tmp/source-archive.zip -a off -t 60 -o /tmp/built
 
@@ -73,10 +74,10 @@ jobs:
               echo "No archive was built?"
               exit 1
           fi
-          echo "::set-output name=version::$version"
-          echo "::set-output name=leafname::$leafname"
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "leafname=$leafname" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: RISCOS-build
           path: ${{ steps.version.outputs.leafname }}
@@ -88,32 +89,19 @@ jobs:
     needs: build-riscos
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
     steps:
-      - name: Download built binary
-        uses: actions/download-artifact@v1
+      - name: Download built RISC OS binary
+        uses: actions/download-artifact@v3
         with:
           name: RISCOS-build
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ needs.build-riscos.outputs.version }}
-          draft: true
           prerelease: false
-
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`.
-          # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: RISCOS-build/${{ needs.build-riscos.outputs.leafname }}
-          asset_name: ${{ needs.build-riscos.outputs.leafname }}
-          asset_content_type: application/zip
+          draft: true
+          artifacts: "${{ needs.build-riscos.outputs.leafname }}"
+          artifactContentType: application/zip
