@@ -96,3 +96,13 @@ Finally, merge your fixed branch into the main branch and it will now be availab
 One additional thing is that if you create a tag which starts with a `v` this will cause a build to happen and at the end of the process a new draft 'Release' will be created. These can be found in the 'Releases' section on the right of the repository. A draft release contains the source referenced by that tag and the result artifacts from your build. You can either publish that release or delete it, if it was not suitable.
 
 If you want to remove this feature, remove the `release` block from the `.github/workflows/ci.yml`file. To trigger based on different tags, change the `tags` block at the start of the file, and the `if: startsWith(github.ref, 'refs/tags/v')` in the `releases` block.
+
+
+## Additional files
+
+There are additional files which may be useful but are not directly related to the
+CI processes:
+
+* `.github/ISSUE_TEMPLATES/...` and `.gitlab/issue_templates/...` - templates for new issues raised on the repository. These may be useful to give contributors guidance in what to provide.
+* `.github/pull_request_template.md` and `.gitlab/merge_request_templates/...` - template for pull requests raised on the repository. These may help contributors to provide information about the changes they propose.
+* `CODEOWNERS` - lists the responsible individuals for areas of the source code.
